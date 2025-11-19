@@ -38,25 +38,25 @@
     margin-left: 6px;
   }
 
-  /* Container that shows ONLY the cropped part */
+  /* Window that shows only the cropped part */
   #crop-box {
     position: relative;
     width: 100vw;                 /* fill phone width */
-    height: calc(100vw * 2.32);   /* aspect ratio of LXSim screen from your screenshot */
+    height: calc(100vw * 2.32);   /* same tall ratio as your LXSim screen */
     overflow: hidden;
     margin: 0 auto;
     background: black;
   }
 
-  /* The VDO.Ninja page with the full video */
+  /* Full VDO.Ninja view, zoomed and shifted so only LXSim is visible */
   #videoFrame {
     position: absolute;
 
-    /* These 4 values are the “magic” crop based on your screenshot */
-    width: 151%;     /* zoom in so the LXSim screen fills the box */
+    /* Start with moderate crop values; we can tighten later */
+    width: 140%;
     height: auto;
-    left: -25.5%;    /* move left so side frame disappears */
-    top: -20%;       /* move up so top window bar disappears */
+    left: -20%;
+    top: -12%;
 
     border: none;
   }
@@ -65,12 +65,17 @@
 <body>
 
 <div id="controls">
-  <input id="urlInput" type="text" placeholder="Paste VDO.Ninja VIEW link here">
-  <button id="loadBtn" onclick="loadVideo()">Load</button>
+  <input id="urlInput" type="text"
+         placeholder="Paste VDO.Ninja VIEW link and press Load or Enter">
+  <button id="loadBtn">Load</button>
 </div>
 
 <div id="crop-box">
-  <iframe id="videoFrame" src=""></iframe>
+  <!-- default src just to prove it works; you can replace with any view link -->
+  <iframe id="videoFrame"
+          src="https://vdo.ninja/"
+          allow="camera; microphone; autoplay; fullscreen">
+  </iframe>
 </div>
 
 <script>
@@ -79,14 +84,24 @@ function loadVideo() {
   let url = input.value.trim();
   if (!url) return;
 
-  // basic sanity check
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    alert('Please paste a valid VDO.Ninja view link.');
+    alert('Please paste a full VDO.Ninja link starting with http…');
     return;
   }
 
   document.getElementById('videoFrame').src = url;
 }
+
+/* Click on button */
+document.getElementById('loadBtn').addEventListener('click', loadVideo);
+
+/* Press Enter / Go on keyboard */
+document.getElementById('urlInput').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    loadVideo();
+  }
+});
 </script>
 
 </body>
