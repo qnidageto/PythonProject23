@@ -47,18 +47,45 @@
             margin-top: 20px;
             width: 80%;
             max-width: 800px;
-            height: 450px; /* Adjusted to a bigger size */
             border: 1px solid #ccc;
             border-radius: 10px;
-            overflow: hidden; /* Ensures content outside the container is cropped */
-            position: relative;
+            overflow: hidden;
         }
         iframe {
             width: 100%;
-            height: 100%;
+            height: 300px;
             border: none;
-            object-fit: cover; /* Ensures content fills and crops */
-            object-position: center; /* Centers the content */
+        }
+        #video-container {
+    margin-top: 20px;
+    width: 300px;       /* visible crop width */
+    height: 300px;      /* visible crop height */
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;   /* IMPORTANT: crop mask */
+    position: relative;
+}
+
+#video {
+    position: absolute;
+    top: -120px;        /* move video UP */
+    left: -80px;        /* move video LEFT */
+    width: 800px;       /* full source width */
+    height: 800px;      /* full source height */
+    border: none;
+}
+        }
+        .expand-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .expand-button:hover {
+            background-color: #007B8C;
         }
     </style>
 </head>
@@ -70,7 +97,7 @@
 
 <div class="container">
     <!-- Input Bar for the URL -->
-    <input type="text" id="streamURL" value="https://vdo.ninja/?view=" placeholder="Enter stream ID after ?view=" />
+    <input type="text" id="streamURL" value="https://vdo.ninja/?view=" placeholder="Enter stream ID after ?push=" />
 
     <!-- Go Button -->
     <button id="goButton">Go</button>
@@ -81,24 +108,36 @@
             Your browser does not support iframes.
         </iframe>
     </div>
+
+
 </div>
 
 <script>
     // Handle Go button click
     document.getElementById('goButton').addEventListener('click', function() {
-        const baseURL = "https://vdo.ninja/?view=";
-        const streamID = document.getElementById('streamURL').value.trim().replace(baseURL, '');
+        const url = document.getElementById('streamURL').value.trim();
 
-        // Ensure a valid stream ID after ?view=
-        if (streamID) {
-            // Create full URL and set it in the iframe
-            const fullURL = baseURL + streamID;
-            document.getElementById('video').src = fullURL;
+        // Check if the URL is not empty and matches a simple regex for a valid URL format
+        const urlPattern = /^(https?:\/\/)?(www\.)?vdo\.ninja\/\S+$/;
+
+        if (urlPattern.test(url)) {
+            // Set the iframe src to the provided URL
+            document.getElementById('video').src = url;
         } else {
-            alert("Please enter a valid stream ID after '?view='.");
+            alert("Please enter a valid vdo.ninja stream URL.");
+        }
+    });
+
+    // Handle Fullscreen toggle
+    document.getElementById('expandButton').addEventListener('click', function() {
+        const videoContainer = document.getElementById('video-container');
+        if (videoContainer.classList.contains('fullscreen')) {
+            videoContainer.classList.remove('fullscreen');
+        } else {
+            videoContainer.classList.add('fullscreen');
         }
     });
 </script>
 
 </body>
-</html>
+</html>  this is my current code tell me what to change dont write a whole new code
