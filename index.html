@@ -1,4 +1,4 @@
-v<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -45,17 +45,24 @@ v<!DOCTYPE html>
         }
         #video-container {
             margin-top: 20px;
-            width: 80%;
-            max-width: 800px;
+            width: 300px;     /* final visible width */
+            height: 300px;    /* final visible height */
             border: 1px solid #ccc;
             border-radius: 10px;
-            overflow: hidden;
+            overflow: hidden;  /* THIS is the crop */
+            position: relative;
         }
-        iframe {
-            width: 100%;
-            height: 300px;
+
+        /* Move the video inside to crop the map into view */
+        #video {
+            position: absolute;
+            top: -120px;     /* adjust UP/DOWN */
+            left: -80px;      /* adjust LEFT/RIGHT */
+            width: 800px;     /* full player width */
+            height: 800px;    /* full player height */
             border: none;
-        }
+}
+
         #video-container.fullscreen iframe {
             width: 100%;
             height: 100vh;
@@ -114,7 +121,3 @@ v<!DOCTYPE html>
 
 </body>
 </html>
-
-
-
-best version.
