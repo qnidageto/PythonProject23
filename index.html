@@ -144,7 +144,7 @@
 <div class="container">
 
     <!-- URL Input -->
-    <input type="text" id="streamURL" value="https://vdo.ninja/?view=P"
+    <input type="text" id="streamURL" value="https://vdo.ninja/?view=0"
            placeholder="Enter stream URL" />
 
     <!-- Go button -->
@@ -184,18 +184,22 @@
     });
 
 
-    /* =====================================================
+       /* =====================================================
        FULLSCREEN FIX FOR iPHONE / SAFARI
        ===================================================== */
 
     function openFullscreen(elem) {
+        if (!elem) return null;
+
         if (elem.requestFullscreen) {
-            elem.requestFullscreen();
+            return elem.requestFullscreen();
         } else if (elem.webkitRequestFullscreen) { // iPhone/iPad Safari
-            elem.webkitRequestFullscreen();
+            return elem.webkitRequestFullscreen();
         } else if (elem.msRequestFullscreen) { // Legacy
-            elem.msRequestFullscreen();
+            return elem.msRequestFullscreen();
         }
+
+        return null;
     }
 
     function closeFullscreen() {
@@ -215,12 +219,30 @@
             null;
     }
 
-    // Button toggles FULLSCREEN ON IFRAME ONLY
+    const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
+
+    // Button toggles FULLSCREEN (tries iframe first, then container)
     document.getElementById('fullscreen-btn').addEventListener('click', function () {
         const iframe = document.getElementById('video');
+        const container = document.getElementById('video-container');
 
         if (!isFullscreenActive()) {
-            openFullscreen(iframe); // <-- FIXED FOR iOS
+            const preferredTarget = isIOS ? container : iframe;
+            const fallbackTarget = isIOS ? null : container;
+
+            try {
+                const request = openFullscreen(preferredTarget);
+
+                if (request && typeof request.then === 'function' && fallbackTarget) {
+                    request.catch(() => openFullscreen(fallbackTarget));
+                } else if (!request && fallbackTarget) {
+                    openFullscreen(fallbackTarget);
+                }
+            } catch (err) {
+                if (fallbackTarget) {
+                    openFullscreen(fallbackTarget);
+                }
+            }
         } else {
             closeFullscreen();
         }
