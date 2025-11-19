@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Stream Viewer</title>
 
     <style>
@@ -50,16 +50,44 @@
             background-color: #45a049;
         }
 
-        /* === DESKTOP / DEFAULT SIZE (CROPPED VIEW) === */
+        /* ===== DEFAULT SIZE (DESKTOP + MOBILE) ===== */
         #video-container {
             margin-top: 20px;
-            width: 650px;
-            height: 1030px;
             border: 1px solid #ccc;
             border-radius: 10px;
             overflow: hidden;
             position: relative;
             background: black;
+        }
+
+        /* "default-size" is what we later scale up in fullscreen */
+        #video-container.default-size {
+            width: 650px;
+            height: 1030px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            input[type="text"] {
+                width: 90vw;
+                max-width: 360px;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+
+            #video-container.default-size {
+                margin-top: 10px;
+                width: 325px;
+                height: 515px;
+            }
         }
 
         #video {
@@ -69,6 +97,15 @@
             width: 739px;
             height: 1600px;
             border: none;
+        }
+
+        @media (max-width: 768px) {
+            #video {
+                top: -155px;
+                left: -25px;
+                width: 369.5px;
+                height: 800px;
+            }
         }
 
         #fullscreen-btn {
@@ -89,38 +126,7 @@
             background: rgba(0,0,0,0.9);
         }
 
-        /* === MOBILE VERSION === */
         @media (max-width: 768px) {
-
-            .container {
-                padding: 10px;
-            }
-
-            input[type="text"] {
-                width: 90vw;
-                max-width: 360px;
-                font-size: 14px;
-                margin-bottom: 10px;
-            }
-
-            button {
-                font-size: 14px;
-                padding: 8px 16px;
-            }
-
-            #video-container {
-                margin-top: 10px;
-                width: 325px;
-                height: 515px;
-            }
-
-            #video {
-                top: -155px;
-                left: -25px;
-                width: 369.5px;
-                height: 800px;
-            }
-
             #fullscreen-btn {
                 top: 6px;
                 left: 6px;
@@ -129,28 +135,26 @@
             }
         }
 
-        /* Browser native fullscreen */
+        /* ===== DESKTOP BROWSER NATIVE FULLSCREEN ===== */
         #video-container:fullscreen,
         #video-container:-webkit-full-screen {
+            /* nothing here so browser handles it normally on desktop */
         }
 
-        /* ===== iOS fake fullscreen (fixed) ===== */
+        /* ===== iOS "FAKE FULLSCREEN" ===== */
         #video-container.fake-fullscreen {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
             margin: 0;
             border-radius: 0;
             z-index: 9998;
         }
 
-        /* IMPORTANT:
-           DO NOT OVERRIDE #video IN FULLSCREEN.
-           This preserves the exact same crop.
-        */
-
+        /* We scale the whole container from its default size */
+        #video-container.fullscreen-scale {
+            transform-origin: top left;
+        }
     </style>
 </head>
 <body>
@@ -163,11 +167,12 @@
 
     <input type="text" id="streamURL" value="https://vdo.ninja/?view=Pp3zQwa"
            placeholder="Enter stream URL" />
-    test
+
 
     <button id="goButton">Go</button>
 
-    <div id="video-container">
+    <!-- NOTE: default-size class is important for scaling -->
+    <div id="video-container" class="default-size">
         <iframe id="video"
                 src=""
                 frameborder="0"
@@ -195,7 +200,7 @@
         }
     });
 
-    /* ====== Fullscreen helpers ====== */
+    /* ====== Fullscreen helpers (desktop) ====== */
     function openFullscreen(elem) {
         if (!elem) return null;
         if (elem.requestFullscreen) return elem.requestFullscreen();
@@ -224,17 +229,46 @@
     const fsBtn = document.getElementById('fullscreen-btn');
     const container = document.getElementById('video-container');
 
+    /* Scale function: keeps the crop identical, just bigger */
+    function applyFullscreenScale() {
+        const w = container.offsetWidth;
+        const h = container.offsetHeight;
+
+        const scaleX = window.innerWidth / w;
+        const scaleY = window.innerHeight / h;
+        const scale = Math.min(scaleX, scaleY);
+
+        container.style.transform = `scale(${scale})`;
+    }
+
     fsBtn.addEventListener('click', function () {
         if (isIOS) {
-            /* Fake fullscreen — preserves crop */
-            container.classList.toggle('fake-fullscreen');
+            /* Fake fullscreen on iOS while preserving crop */
+            const goingFullscreen = !container.classList.contains('fake-fullscreen');
+
+            if (goingFullscreen) {
+                container.classList.add('fake-fullscreen', 'fullscreen-scale');
+                container.classList.remove('default-size');
+                applyFullscreenScale();
+            } else {
+                container.classList.remove('fake-fullscreen', 'fullscreen-scale');
+                container.classList.add('default-size');
+                container.style.transform = 'none';
+            }
         } else {
-            /* Real fullscreen */
+            /* Real fullscreen on non-iOS (desktop, Android, etc.) */
             if (!isFullscreenActive()) {
                 openFullscreen(container);
             } else {
                 closeFullscreen();
             }
+        }
+    });
+
+    /* Recalculate scale if the orientation / size changes while in fake fullscreen */
+    window.addEventListener('resize', () => {
+        if (isIOS && container.classList.contains('fake-fullscreen')) {
+            applyFullscreenScale();
         }
     });
 </script>
