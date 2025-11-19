@@ -1,92 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: black;
-    overflow: hidden;
-    font-family: -apple-system, Arial, sans-serif;
-    color: white;
-  }
-
-  /* Top bar with input */
-  #controls {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-    background: #111;
-  }
-
-  #urlInput {
-    width: 70%;
-    padding: 8px;
-    font-size: 14px;
-    border-radius: 6px;
-    border: none;
-  }
-
-  #loadBtn {
-    padding: 8px 16px;
-    font-size: 14px;
-    border-radius: 6px;
-    border: none;
-    background: #28a745;
-    color: #fff;
-    margin-left: 6px;
-  }
-
-  /* Container that shows ONLY the cropped part */
-  #crop-box {
-    position: relative;
-    width: 100vw;                 /* fill phone width */
-    height: calc(100vw * 2.32);   /* aspect ratio of LXSim screen from your screenshot */
-    overflow: hidden;
-    margin: 0 auto;
-    background: black;
-  }
-
-  /* The VDO.Ninja page with the full video */
-  #videoFrame {
-    position: absolute;
-
-    /* These 4 values are the “magic” crop based on your screenshot */
-    width: 151%;     /* zoom in so the LXSim screen fills the box */
-    height: auto;
-    left: -25.5%;    /* move left so side frame disappears */
-    top: -20%;       /* move up so top window bar disappears */
-
-    border: none;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #video-container {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 800px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #video {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        #video-container.fullscreen #video {
+            width: 100%;
+            height: 100vh;
+            transform: none;
+        }
+        .qr-container {
+            margin-top: 20px;
+        }
+        .qr-input {
+            display: none;
+        }
+        .qr-label {
+            padding: 10px 20px;
+            background-color: #555;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .qr-label:hover {
+            background-color: #444;
+        }
+        .qr-container input {
+            display: none;
+        }
+        .expand-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .expand-button:hover {
+            background-color: #007B8C;
+        }
+    </style>
 </head>
 <body>
 
-<div id="controls">
-  <input id="urlInput" type="text" placeholder="Paste VDO.Ninja VIEW link here">
-  <button id="loadBtn" onclick="loadVideo()">Load</button>
-</div>
+<header>
+    <h1>Stream Viewer</h1>
+</header>
 
-<div id="crop-box">
-  <iframe id="videoFrame" src=""></iframe>
+<div class="container">
+    <!-- Input Bar for the URL -->
+    <input type="text" id="streamURL" placeholder="Enter vdo.ninja stream URL" />
+
+    <!-- Go Button -->
+    <button id="goButton">Go</button>
+
+    <!-- Video Container -->
+    <div id="video-container">
+        <video id="video" controls>
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- QR Code Scanning Section -->
+    <div class="qr-container">
+        <label for="qr-upload" class="qr-label">Scan QR Code</label>
+        <input type="file" id="qr-upload" class="qr-input" accept="image/*" onchange="handleFileSelect(event)">
+    </div>
+
+    <!-- Expand Button -->
+    <button class="expand-button" id="expandButton">Expand to Fullscreen</button>
 </div>
 
 <script>
-function loadVideo() {
-  const input = document.getElementById('urlInput');
-  let url = input.value.trim();
-  if (!url) return;
+    // Handle Go button click
+    document.getElementById('goButton').addEventListener('click', function() {
+        const url = document.getElementById('streamURL').value;
+        if (url) {
+            document.getElementById('video').src = url;
+        }
+    });
 
-  // basic sanity check
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    alert('Please paste a valid VDO.Ninja view link.');
-    return;
-  }
+    // Handle Fullscreen toggle
+    document.getElementById('expandButton').addEventListener('click', function() {
+        const videoContainer = document.getElementById('video-container');
+        if (videoContainer.classList.contains('fullscreen')) {
+            videoContainer.classList.remove('fullscreen');
+        } else {
+            videoContainer.classList.add('fullscreen');
+        }
+    });
 
-  document.getElementById('videoFrame').src = url;
-}
+    // QR Code Upload Handling
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Use a library to read QR code from the image, like jsQR or others.
+            alert('QR code scanned (functionality not implemented yet)');
+        }
+    }
 </script>
 
 </body>
