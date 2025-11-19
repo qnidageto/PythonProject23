@@ -60,18 +60,6 @@ v<!DOCTYPE html>
             width: 100%;
             height: 100vh;
         }
-        .expand-button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color: #008CBA;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .expand-button:hover {
-            background-color: #007B8C;
-        }
     </style>
 </head>
 <body>
