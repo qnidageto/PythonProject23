@@ -93,6 +93,7 @@
 
         /* === MOBILE VERSION === */
         @media (max-width: 768px) {
+
             .container {
                 padding: 10px;
             }
@@ -151,7 +152,16 @@
 
     <!-- Video container with crop -->
     <div id="video-container">
-        <iframe id="video" src="" allow="camera; microphone;" frameborder="0"></iframe>
+
+        <!-- IMPORTANT: full iOS fullscreen permissions -->
+        <iframe id="video"
+                src=""
+                frameborder="0"
+                allow="fullscreen; camera; microphone"
+                allowfullscreen
+                webkitallowfullscreen
+                mozallowfullscreen>
+        </iframe>
 
         <!-- FULLSCREEN BUTTON -->
         <button id="fullscreen-btn">⛶</button>
@@ -174,14 +184,16 @@
     });
 
 
-    /* ====== FULLSCREEN SUPPORT ====== */
+    /* =====================================================
+       FULLSCREEN FIX FOR iPHONE / SAFARI
+       ===================================================== */
 
     function openFullscreen(elem) {
         if (elem.requestFullscreen) {
             elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) { // Safari/iOS
+        } else if (elem.webkitRequestFullscreen) { // iPhone/iPad Safari
             elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) { // IE/Edge Legacy
+        } else if (elem.msRequestFullscreen) { // Legacy
             elem.msRequestFullscreen();
         }
     }
@@ -189,7 +201,7 @@
     function closeFullscreen() {
         if (document.exitFullscreen) {
             document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) { // Safari/iOS
+        } else if (document.webkitExitFullscreen) { // iPhone/iPad Safari
             document.webkitExitFullscreen();
         } else if (document.msExitFullscreen) {
             document.msExitFullscreen();
@@ -203,12 +215,12 @@
             null;
     }
 
-    // Button toggle fullscreen
+    // Button toggles FULLSCREEN ON IFRAME ONLY
     document.getElementById('fullscreen-btn').addEventListener('click', function () {
-        const container = document.getElementById('video-container');
+        const iframe = document.getElementById('video');
 
         if (!isFullscreenActive()) {
-            openFullscreen(container);
+            openFullscreen(iframe); // <-- FIXED FOR iOS
         } else {
             closeFullscreen();
         }
