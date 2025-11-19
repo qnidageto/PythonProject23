@@ -1,4 +1,4 @@
-///<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -82,7 +82,7 @@
 
 <div class="container">
     <!-- Input Bar for the URL -->
-    <input type="text" id="streamURL" placeholder="Enter vdo.ninja stream URL" />
+    <input type="text" id="streamURL" value="https://vdo.ninja/?view=" placeholder="Enter stream ID after ?push=" />
 
     <!-- Go Button -->
     <button id="goButton">Go</button>
@@ -94,8 +94,7 @@
         </iframe>
     </div>
 
-    <!-- Expand Button -->
-    <button class="expand-button" id="expandButton">Expand to Fullscreen</button>
+
 </div>
 
 <script>
@@ -127,4 +126,3 @@
 
 </body>
 </html>
-///

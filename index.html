@@ -55,10 +55,15 @@
             width: 100%;
             height: 300px;
             border: none;
+            object-fit: cover; /* Ensures content covers the area */
+            transition: transform 0.3s ease; /* Smooth transition for scale */
         }
+        /* In fullscreen mode, slightly zoom in and center */
         #video-container.fullscreen iframe {
             width: 100%;
-            height: 100vh;
+            height: 100vh; /* Full viewport height */
+            transform: scale(1.05); /* Slight zoom to focus on the center */
+            object-position: center top; /* Center the content with a slight top offset */
         }
         .expand-button {
             margin-top: 10px;
@@ -82,7 +87,7 @@
 
 <div class="container">
     <!-- Input Bar for the URL -->
-    <input type="text" id="streamURL" value="https://vdo.ninja/?view=" placeholder="Enter stream ID after ?push=" />
+    <input type="text" id="streamURL" value="https://vdo.ninja/?push=" placeholder="Enter stream ID after ?push=" />
 
     <!-- Go Button -->
     <button id="goButton">Go</button>
@@ -94,22 +99,22 @@
         </iframe>
     </div>
 
-
+    <!-- Expand Button -->
+    <button class="expand-button" id="expandButton">Expand to Fullscreen</button>
 </div>
 
 <script>
     // Handle Go button click
     document.getElementById('goButton').addEventListener('click', function() {
-        const url = document.getElementById('streamURL').value.trim();
+        const baseURL = "https://vdo.ninja/?push=";
+        const streamID = document.getElementById('streamURL').value.trim().replace(baseURL, '');
 
-        // Check if the URL is not empty and matches a simple regex for a valid URL format
-        const urlPattern = /^(https?:\/\/)?(www\.)?vdo\.ninja\/\S+$/;
-
-        if (urlPattern.test(url)) {
-            // Set the iframe src to the provided URL
-            document.getElementById('video').src = url;
+        if (streamID) {
+            // Complete the URL and set the iframe src
+            const fullURL = baseURL + streamID;
+            document.getElementById('video').src = fullURL;
         } else {
-            alert("Please enter a valid vdo.ninja stream URL.");
+            alert("Please enter a valid stream ID after '?push='.");
         }
     });
 
