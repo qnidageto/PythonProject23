@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Viewer</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,18 +12,21 @@
             padding: 0;
             background-color: #f0f0f0;
         }
+
         header {
             background-color: #333;
             color: white;
             padding: 10px 20px;
             text-align: center;
         }
+
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
         }
+
         input[type="text"] {
             padding: 10px;
             width: 300px;
@@ -31,6 +35,7 @@
             border-radius: 5px;
             border: 1px solid #ccc;
         }
+
         button {
             padding: 10px 20px;
             font-size: 16px;
@@ -40,11 +45,12 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #45a049;
         }
 
-        /* === DESKTOP / DEFAULT SIZE === */
+        /* === DESKTOP / DEFAULT SIZE (crop unchanged) === */
         #video-container {
             margin-top: 20px;
             width: 640px;
@@ -65,34 +71,28 @@
             border: none;
         }
 
+        /* Fullscreen button: TOP-LEFT + bigger */
         #fullscreen-btn {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
-            padding: 8px 10px;
-            background: rgba(0,0,0,0.6);
+            top: 10px;
+            left: 10px;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.7);
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 22px;
             z-index: 9999;
         }
 
         #fullscreen-btn:hover {
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
         }
 
-        /* === MOBILE: MAKE PLAYER SMALLER === */
+
+        /* === MOBILE VERSION === */
         @media (max-width: 768px) {
-            body {
-                background-color: #fff;
-            }
-
-            header {
-                padding: 8px 10px;
-            }
-
             .container {
                 padding: 10px;
             }
@@ -109,28 +109,30 @@
                 padding: 8px 16px;
             }
 
-            /* Scale down the cropped display to fit on one screen */
+            /* Scale player down on mobile */
             #video-container {
                 margin-top: 10px;
-                width: 320px;      /* 50% of 640 */
-                height: 515px;     /* 50% of 1030 */
+                width: 320px;        /* 50% of 640 */
+                height: 515px;       /* 50% of 1030 */
             }
 
             #video {
-                top: -160px;       /* 50% of -320 */
-                left: -25px;       /* 50% of -50 */
-                width: 369.5px;    /* 50% of 739 */
-                height: 800px;     /* 50% of 1600 */
+                top: -160px;         /* 50% of -320 */
+                left: -25px;         /* 50% of -50 */
+                width: 369.5px;      /* 50% of 739 */
+                height: 800px;       /* 50% of 1600 */
             }
 
+            /* Fullscreen button also shrinks slightly */
             #fullscreen-btn {
-                bottom: 8px;
-                right: 8px;
-                font-size: 16px;
-                padding: 6px 8px;
+                top: 6px;
+                left: 6px;
+                font-size: 20px;
+                padding: 8px 10px;
             }
         }
     </style>
+
 </head>
 <body>
 
@@ -140,39 +142,75 @@
 
 <div class="container">
 
-    <input type="text" id="streamURL" value="https://vdo.ninja/?view=" placeholder="Enter stream ID" />
+    <!-- URL Input -->
+    <input type="text" id="streamURL" value="https://vdo.ninja/?view=P"
+           placeholder="Enter stream URL" />
+
+    <!-- Go button -->
     <button id="goButton">Go</button>
 
+    <!-- Video container with crop -->
     <div id="video-container">
         <iframe id="video" src="" allow="camera; microphone;" frameborder="0"></iframe>
+
+        <!-- FULLSCREEN BUTTON -->
         <button id="fullscreen-btn">⛶</button>
     </div>
 
 </div>
 
+
 <script>
-    // Go button
-    document.getElementById('goButton').addEventListener('click', function() {
+    /* ====== LOAD STREAM ====== */
+    document.getElementById('goButton').addEventListener('click', function () {
         const url = document.getElementById('streamURL').value.trim();
         const urlPattern = /^(https?:\/\/)?(www\.)?vdo\.ninja\/\S+$/;
 
         if (urlPattern.test(url)) {
             document.getElementById('video').src = url;
         } else {
-            alert("Please enter a valid vdo.ninja stream URL.");
+            alert("Please enter a valid vdo.ninja URL.");
         }
     });
 
-    // Fullscreen toggle
-    document.getElementById('fullscreen-btn').addEventListener('click', function() {
+
+    /* ====== FULLSCREEN SUPPORT ====== */
+
+    function openFullscreen(elem) {
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { // Safari/iOS
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { // IE/Edge Legacy
+            elem.msRequestFullscreen();
+        }
+    }
+
+    function closeFullscreen() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { // Safari/iOS
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+
+    function isFullscreenActive() {
+        return document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement ||
+            null;
+    }
+
+    // Button toggle fullscreen
+    document.getElementById('fullscreen-btn').addEventListener('click', function () {
         const container = document.getElementById('video-container');
 
-        if (!document.fullscreenElement) {
-            container.requestFullscreen().catch(err => {
-                alert(`Error entering fullscreen: ${err.message}`);
-            });
+        if (!isFullscreenActive()) {
+            openFullscreen(container);
         } else {
-            document.exitFullscreen();
+            closeFullscreen();
         }
     });
 </script>
