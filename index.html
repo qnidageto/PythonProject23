@@ -45,20 +45,20 @@
         }
         #video-container {
             margin-top: 20px;
-            width: 80%; /* You can adjust this as per your preference */
+            width: 80%;
             max-width: 800px;
-            height: 300px; /* Set a height that fits your design */
+            height: 300px; /* Adjust height */
             border: 1px solid #ccc;
             border-radius: 10px;
-            overflow: hidden; /* This will hide the parts outside the container */
+            overflow: hidden; /* Ensures content outside the container is cropped */
             position: relative;
         }
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            object-fit: cover; /* Ensures the content fills the area */
-            object-position: center; /* Keeps the content centered */
+            object-fit: cover; /* Ensures content fills and crops */
+            object-position: center; /* Centers the content */
         }
     </style>
 </head>
@@ -70,7 +70,7 @@
 
 <div class="container">
     <!-- Input Bar for the URL -->
-    <input type="text" id="streamURL" value="https://vdo.ninja/?view=1" placeholder="Enter stream ID after ?view=" />
+    <input type="text" id="streamURL" value="https://vdo.ninja/?view=0" placeholder="Enter stream ID after ?view=" />
 
     <!-- Go Button -->
     <button id="goButton">Go</button>
@@ -86,16 +86,16 @@
 <script>
     // Handle Go button click
     document.getElementById('goButton').addEventListener('click', function() {
-        const url = document.getElementById('streamURL').value.trim();
+        const baseURL = "https://vdo.ninja/?view=";
+        const streamID = document.getElementById('streamURL').value.trim().replace(baseURL, '');
 
-        // Check if the URL is not empty and matches a valid vdo.ninja URL format
-        const urlPattern = /^(https?:\/\/)?(www\.)?vdo\.ninja\/\S+$/;
-
-        if (urlPattern.test(url)) {
-            // Set the iframe src to the provided URL
-            document.getElementById('video').src = url;
+        // Ensure a valid stream ID after ?view=
+        if (streamID) {
+            // Create full URL and set it in the iframe
+            const fullURL = baseURL + streamID;
+            document.getElementById('video').src = fullURL;
         } else {
-            alert("Please enter a valid vdo.ninja stream URL.");
+            alert("Please enter a valid stream ID after '?view='.");
         }
     });
 </script>
