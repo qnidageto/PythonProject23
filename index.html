@@ -43,31 +43,92 @@
         button:hover {
             background-color: #45a049;
         }
-#video-container {
-    margin-top: 20px;
-    width: 640px;        /* unchanged */
-    height: 1030px;      /* +20px bottom again */
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
-}
 
-#video {
-    position: absolute;
-    top: -320px;         /* unchanged */
-    left: -50px;         /* unchanged */
-    width: 739px;
-    height: 1600px;
-}
+        /* === DESKTOP / DEFAULT SIZE === */
+        #video-container {
+            margin-top: 20px;
+            width: 640px;
+            height: 1030px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            background: black;
+        }
 
+        #video {
+            position: absolute;
+            top: -320px;
+            left: -50px;
+            width: 739px;
+            height: 1600px;
+            border: none;
+        }
 
+        #fullscreen-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            padding: 8px 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 9999;
+        }
 
+        #fullscreen-btn:hover {
+            background: rgba(0,0,0,0.8);
+        }
 
+        /* === MOBILE: MAKE PLAYER SMALLER === */
+        @media (max-width: 768px) {
+            body {
+                background-color: #fff;
+            }
 
-        #video-container.fullscreen iframe {
-            width: 100%;
-            height: 100vh;
+            header {
+                padding: 8px 10px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            input[type="text"] {
+                width: 90vw;
+                max-width: 360px;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+
+            /* Scale down the cropped display to fit on one screen */
+            #video-container {
+                margin-top: 10px;
+                width: 320px;      /* 50% of 640 */
+                height: 515px;     /* 50% of 1030 */
+            }
+
+            #video {
+                top: -160px;       /* 50% of -320 */
+                left: -25px;       /* 50% of -50 */
+                width: 369.5px;    /* 50% of 739 */
+                height: 800px;     /* 50% of 1600 */
+            }
+
+            #fullscreen-btn {
+                bottom: 8px;
+                right: 8px;
+                font-size: 16px;
+                padding: 6px 8px;
+            }
         }
     </style>
 </head>
@@ -78,45 +139,40 @@
 </header>
 
 <div class="container">
-    <!-- Input Bar for the URL -->
-    <input type="text" id="streamURL" value="https://vdo.ninja/?view=P" placeholder="Enter stream ID after ?push=" />
 
-    <!-- Go Button -->
+    <input type="text" id="streamURL" value="https://vdo.ninja/?view=" placeholder="Enter stream ID" />
     <button id="goButton">Go</button>
 
-    <!-- Video Container with iframe -->
     <div id="video-container">
-        <iframe id="video" src="" allow="camera; microphone;" frameborder="0">
-            Your browser does not support iframes.
-        </iframe>
+        <iframe id="video" src="" allow="camera; microphone;" frameborder="0"></iframe>
+        <button id="fullscreen-btn">⛶</button>
     </div>
-
 
 </div>
 
 <script>
-    // Handle Go button click
+    // Go button
     document.getElementById('goButton').addEventListener('click', function() {
         const url = document.getElementById('streamURL').value.trim();
-
-        // Check if the URL is not empty and matches a simple regex for a valid URL format
         const urlPattern = /^(https?:\/\/)?(www\.)?vdo\.ninja\/\S+$/;
 
         if (urlPattern.test(url)) {
-            // Set the iframe src to the provided URL
             document.getElementById('video').src = url;
         } else {
             alert("Please enter a valid vdo.ninja stream URL.");
         }
     });
 
-    // Handle Fullscreen toggle
-    document.getElementById('expandButton').addEventListener('click', function() {
-        const videoContainer = document.getElementById('video-container');
-        if (videoContainer.classList.contains('fullscreen')) {
-            videoContainer.classList.remove('fullscreen');
+    // Fullscreen toggle
+    document.getElementById('fullscreen-btn').addEventListener('click', function() {
+        const container = document.getElementById('video-container');
+
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(err => {
+                alert(`Error entering fullscreen: ${err.message}`);
+            });
         } else {
-            videoContainer.classList.add('fullscreen');
+            document.exitFullscreen();
         }
     });
 </script>
