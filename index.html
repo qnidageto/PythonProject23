@@ -1,272 +1,243 @@
-<!-- /public/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <!-- Important for iOS notch + true viewport -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <!-- Optional: better “Add to Home Screen” behavior -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Stream Viewer</title>
-  <meta name="color-scheme" content="light dark" />
-  <style>
-    :root { --bg:#f6f7f9; --fg:#111; --muted:#666; --primary:#2563eb; --primary-hover:#1d4ed8; --ok:#16a34a; --warn:#b91c1c; --card:#fff; --border:#e5e7eb; }
-    @media (prefers-color-scheme: dark) {
-      :root { --bg:#0b0f14; --fg:#e5e7eb; --muted:#94a3b8; --primary:#60a5fa; --primary-hover:#3b82f6; --ok:#22c55e; --warn:#ef4444; --card:#0f172a; --border:#1f2937; }
-      body { background: radial-gradient(1200px 600px at 50% -20%,rgba(96,165,250,.08),transparent 60%) var(--bg); }
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin:0;
-      font-family: ui-sans-serif,system-ui,Segoe UI,Roboto,Arial,Apple Color Emoji,Segoe UI Emoji;
-      background-color: var(--bg);
-      color: var(--fg);
-      /* Keep content clear of the notch/home-bar */
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    header { background: linear-gradient(90deg,var(--primary),var(--ok)); color:#fff; padding:14px 20px; text-align:center; padding-top: calc(14px + env(safe-area-inset-top)); }
-    header h1 { margin:0; font-size: clamp(18px,3vw,24px); letter-spacing:.2px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Viewer</title>
 
-    .container { display:flex; flex-direction:column; align-items:center; gap:16px; padding:22px 16px 32px; }
-    .card { width:min(980px,92vw); background: var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow: 0 6px 24px rgba(0,0,0,0.06); }
-    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    label { font-weight:600; font-size:14px; margin-bottom:6px; display:block; }
-    input[type="text"] { flex:1 1 420px; padding:12px 14px; border:1px solid var(--border); border-radius:10px; font-size:16px; background:transparent; color:inherit; outline:none; }
-    input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent); }
-    .btn { padding:11px 16px; font-size:15px; border:0; border-radius:10px; cursor:pointer; transition: transform .02s ease; }
-    .btn:active { transform: translateY(1px); }
-    .btn-primary { background: var(--primary); color:#fff; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-ghost { background: transparent; border:1px solid var(--border); color: var(--fg); }
-    .helper { font-size:12px; color: var(--muted); margin-top:4px; }
-    #status { min-height:20px; font-size:13px; color: var(--muted); }
-    #status.ok { color: var(--ok); }
-    #status.err { color: var(--warn); }
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
 
-    /* Default: keep 16:9, avoids distortion */
-    #video-container {
-      position: relative;
-      width:100%;
-      border:1px solid var(--border);
-      border-radius:14px;
-      overflow:hidden;
-      aspect-ratio: 16 / 9;
-      background:#000;
-    }
-    iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
 
-    .toolbar { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
-    .kbd { font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; padding:2px 6px; border:1px solid var(--border); border-radius:6px; background: color-mix(in oklab, var(--card) 80%, #000 5%); }
-    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    .spacer { flex:1; }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
 
-    /* Immersive "Fill" mode for iOS – uses true viewport height */
-    .fill-mode body, .fill-mode { overflow:hidden; }
-    .fill-mode header, .fill-mode #inputCard { display:none; }
-    .fill-mode #playerCard { width:100vw; max-width:100vw; border-radius:0; border:0; padding:0; }
-    .fill-mode #video-container {
-      width:100vw;
-      border-radius:0;
-      border:0;
-      /* Fallback for old iOS via --vh; then modern units */
-      height: calc(var(--vh, 1vh) * 100);
-      height: 100svh;
-      height: 100dvh;
-      aspect-ratio:auto;
-    }
-  </style>
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* === DESKTOP / DEFAULT SIZE (CROPPED VIEW) === */
+        #video-container {
+            margin-top: 20px;
+            width: 650px;
+            height: 1030px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            background: black;
+        }
+
+        #video {
+            position: absolute;
+            top: -310px;
+            left: -50px;
+            width: 739px;
+            height: 1600px;
+            border: none;
+        }
+
+        #fullscreen-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 22px;
+            z-index: 9999;
+        }
+
+        #fullscreen-btn:hover {
+            background: rgba(0,0,0,0.9);
+        }
+
+        /* === MOBILE VERSION === */
+        @media (max-width: 768px) {
+
+            .container {
+                padding: 10px;
+            }
+
+            input[type="text"] {
+                width: 90vw;
+                max-width: 360px;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+
+            #video-container {
+                margin-top: 10px;
+                width: 325px;
+                height: 515px;
+            }
+
+            #video {
+                top: -155px;
+                left: -25px;
+                width: 369.5px;
+                height: 800px;
+            }
+
+            #fullscreen-btn {
+                top: 6px;
+                left: 6px;
+                font-size: 20px;
+                padding: 8px 10px;
+            }
+        }
+
+        /* Browser native fullscreen */
+        #video-container:fullscreen,
+        #video-container:-webkit-full-screen {
+        }
+
+        /* ===== iOS fake fullscreen (fixed) ===== */
+        #video-container.fake-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            border-radius: 0;
+            z-index: 9998;
+        }
+
+        /* IMPORTANT:
+           DO NOT OVERRIDE #video IN FULLSCREEN.
+           This preserves the exact same crop.
+        */
+
+    </style>
 </head>
 <body>
-  <header><h1>Stream Viewer</h1></header>
 
-  <main class="container">
-    <section id="inputCard" class="card" aria-labelledby="inputTitle">
-      <h2 id="inputTitle" class="sr-only">Open a VDO.Ninja stream</h2>
-      <label for="streamInput">Stream URL or ID</label>
-      <div class="row">
-        <input
-          id="streamInput"
-          type="text"
-          inputmode="url"
-          autocomplete="off"
-          placeholder="e.g. https://vdo.ninja/?view=abcd1234  — or just: abcd1234"
-          aria-describedby="helper"
-        />
-        <button id="goBtn" class="btn btn-primary" type="button">Go</button>
-        <button id="resetBtn" class="btn btn-ghost" type="button" title="Clear input">Reset</button>
-      </div>
-      <div id="helper" class="helper">
-        Accepts a full <strong>vdo.ninja</strong> URL or a bare stream ID. Press <span class="kbd">Enter</span> to load.
-      </div>
-      <div id="status" role="status" aria-live="polite"></div>
-    </section>
+<header>
+    <h1>Stream Viewer</h1>
+</header>
 
-    <section id="playerCard" class="card" aria-labelledby="playerTitle">
-      <h2 id="playerTitle" class="sr-only">Player</h2>
-      <div id="video-container">
-        <iframe
-          id="video"
-          src=""
-          title="VDO.Ninja Stream"
-          allow="camera; microphone; autoplay; fullscreen; clipboard-read; clipboard-write"
-          allowfullscreen
-          referrerpolicy="no-referrer"
-        >Your browser does not support iframes.</iframe>
-      </div>
-      <div class="toolbar">
-        <span class="spacer"></span>
-        <button id="fillBtn" class="btn btn-ghost" type="button" title="Toggle Fill Screen">Fill <span class="kbd">⌘⇧F</span></button>
-        <button id="fullscreenBtn" class="btn btn-ghost" type="button" title="Toggle Fullscreen">Fullscreen <span class="kbd">F</span></button>
-        <button id="copyBtn" class="btn btn-ghost" type="button" title="Copy current URL">Copy URL</button>
-      </div>
-    </section>
-  </main>
+<div class="container">
 
-  <script>
-    // Why: iOS Safari misreports 100vh; we compute --vh so the player truly fills the viewport in Fill mode.
-    (function () {
-      const BASE = "https://vdo.ninja/?view=";
-      const STORAGE_KEY = "stream_viewer_last_url";
-      const input = document.getElementById("streamInput");
-      const iframe = document.getElementById("video");
-      const status = document.getElementById("status");
-      const goBtn = document.getElementById("goBtn");
-      const resetBtn = document.getElementById("resetBtn");
-      const fullscreenBtn = document.getElementById("fullscreenBtn");
-      const copyBtn = document.getElementById("copyBtn");
-      const container = document.getElementById("video-container");
-      const fillBtn = document.getElementById("fillBtn");
+    <input type="text" id="streamURL" value="https://vdo.ninja/?view=Pp3zQwa"
+           placeholder="Enter stream URL" />
+    test
 
-      const idRegex = /^[A-Za-z0-9_\-]{3,128}$/;
-      const hostAllowlist = new Set(["vdo.ninja"]);
+    <button id="goButton">Go</button>
 
-      function setStatus(msg, type = "") {
-        if (!status) return;
-        status.textContent = msg || "";
-        status.className = type ? type : "";
-      }
+    <div id="video-container">
+        <iframe id="video"
+                src=""
+                frameborder="0"
+                allow="fullscreen; camera; microphone"
+                allowfullscreen
+                webkitallowfullscreen
+                mozallowfullscreen>
+        </iframe>
 
-      function ensureHttps(u) {
-        if (!/^https?:\/\//i.test(u)) return "https://" + u;
-        return u.replace(/^http:\/\//i, "https://");
-      }
+        <button id="fullscreen-btn">⛶</button>
+    </div>
 
-      function sanitizeVdoUrl(u) {
-        try {
-          const url = new URL(ensureHttps(u));
-          if (!hostAllowlist.has(url.hostname)) throw new Error("Only vdo.ninja is allowed.");
-          const params = url.searchParams;
-          if (!params.has("cleanoutput")) params.append("cleanoutput", "1");
-          url.search = params.toString();
-          return url.toString();
-        } catch {
-          throw new Error("Invalid URL.");
-        }
-      }
+</div>
 
-      function normalizeInputToUrl(raw) {
-        const val = (raw || "").trim();
-        if (!val) throw new Error("Input is empty.");
-        if (idRegex.test(val) && !val.includes("?") && !val.includes("/")) {
-          return BASE + encodeURIComponent(val) + "&cleanoutput=1";
-        }
-        return sanitizeVdoUrl(val);
-      }
+<script>
+    /* ====== LOAD STREAM ====== */
+    document.getElementById('goButton').addEventListener('click', function () {
+        const url = document.getElementById('streamURL').value.trim();
+        const urlPattern = /^https?:\/\/[^ ]+$/;
 
-      function loadStream(raw) {
-        try {
-          const target = normalizeInputToUrl(raw);
-          iframe.src = target;
-          localStorage.setItem(STORAGE_KEY, target);
-          setStatus("Loaded stream.", "ok");
-        } catch (err) {
-          setStatus(err.message || "Invalid input.", "err");
-        }
-      }
-
-      // iOS 100vh fix
-      function setVhUnit() {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty("--vh", `${vh}px`);
-      }
-      setVhUnit();
-      window.addEventListener("resize", setVhUnit, { passive: true });
-      window.addEventListener("orientationchange", () => setTimeout(setVhUnit, 250), { passive: true });
-
-      // Events
-      goBtn.addEventListener("click", () => loadStream(input.value));
-      resetBtn.addEventListener("click", () => {
-        input.value = "";
-        setStatus("");
-        iframe.removeAttribute("src");
-        localStorage.removeItem(STORAGE_KEY);
-        input.focus();
-      });
-
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          loadStream(input.value);
-        }
-      });
-
-      document.addEventListener("keydown", (e) => {
-        const tag = (document.activeElement?.tagName || "").toLowerCase();
-        const typing = tag === "input" || tag === "textarea";
-        if (e.key.toLowerCase() === "f" && !typing) {
-          e.preventDefault();
-          toggleFullscreen();
-        }
-        if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "f" && !typing) {
-          e.preventDefault();
-          toggleFillMode();
-        }
-      });
-
-      function toggleFullscreen() {
-        const el = container;
-        if (document.fullscreenElement) {
-          document.exitFullscreen().catch(() => { el.classList.remove("fullscreen"); });
+        if (urlPattern.test(url)) {
+            document.getElementById('video').src = url;
         } else {
-          (el.requestFullscreen ? el.requestFullscreen() : Promise.reject()).catch(() => {
-            el.classList.toggle("fullscreen");
-          });
+            alert("Please enter a valid stream URL.");
         }
-      }
+    });
 
-      function toggleFillMode() {
-        document.body.classList.toggle("fill-mode");
-        setVhUnit(); // recalc after layout change
-      }
+    /* ====== Fullscreen helpers ====== */
+    function openFullscreen(elem) {
+        if (!elem) return null;
+        if (elem.requestFullscreen) return elem.requestFullscreen();
+        if (elem.webkitRequestFullscreen) return elem.webkitRequestFullscreen();
+        if (elem.msRequestFullscreen) return elem.msRequestFullscreen();
+    }
 
-      fullscreenBtn.addEventListener("click", toggleFullscreen);
-      fillBtn.addEventListener("click", toggleFillMode);
+    function closeFullscreen() {
+        if (document.exitFullscreen) return document.exitFullscreen();
+        if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+        if (document.msExitFullscreen) return document.msExitFullscreen();
+    }
 
-      copyBtn.addEventListener("click", async () => {
-        const src = iframe.getAttribute("src") || input.value.trim();
-        if (!src) return setStatus("Nothing to copy.", "err");
-        try {
-          await navigator.clipboard.writeText(src);
-          setStatus("URL copied to clipboard.", "ok");
-        } catch {
-          setStatus("Clipboard blocked by browser.", "err");
+    function isFullscreenActive() {
+        return document.fullscreenElement ||
+               document.webkitFullscreenElement ||
+               document.msFullscreenElement ||
+               null;
+    }
+
+    /* ====== iOS detection ====== */
+    const isIOS =
+        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+
+    const fsBtn = document.getElementById('fullscreen-btn');
+    const container = document.getElementById('video-container');
+
+    fsBtn.addEventListener('click', function () {
+        if (isIOS) {
+            /* Fake fullscreen — preserves crop */
+            container.classList.toggle('fake-fullscreen');
+        } else {
+            /* Real fullscreen */
+            if (!isFullscreenActive()) {
+                openFullscreen(container);
+            } else {
+                closeFullscreen();
+            }
         }
-      });
+    });
+</script>
 
-      // Restore last URL on load
-      (function restore() {
-        const last = localStorage.getItem(STORAGE_KEY);
-        if (last) {
-          input.value = last;
-          iframe.src = last;
-          setStatus("Restored last session.", "ok");
-        }
-      })();
-    })();
-  </script>
 </body>
 </html>
