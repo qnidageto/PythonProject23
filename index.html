@@ -172,6 +172,8 @@
         <button id="fullscreen-btn">⛶</button>
     </div>
 
+    <button id="testFS" style="margin-top:20px;">TEST REAL VIDEO FULLSCREEN</button>
+
 </div>
 
 <script>
@@ -216,14 +218,12 @@
     const fsBtn = document.getElementById('fullscreen-btn');
     const container = document.getElementById('video-container');
 
-    /* ⬇⬇ THIS is the function we’re changing */
+    /* Scale function: magnify the existing crop */
     function applyFullscreenScale() {
         const rect = container.getBoundingClientRect();
-
         const scaleX = window.innerWidth / rect.width;
-        // Use ONLY width-based scaling so full height stays visible
-        const scale = scaleX;
-
+        const scaleY = window.innerHeight / rect.height;
+        const scale = Math.min(scaleX, scaleY);
         container.style.transform = `scale(${scale})`;
     }
 
@@ -255,6 +255,25 @@
             applyFullscreenScale();
         }
     });
+
+
+
+    document.getElementById("testFS").addEventListener("click", () => {
+    try {
+        const iframe = document.getElementById("video");
+        const videoInside = iframe.contentWindow.document.querySelector("video");
+
+        if (videoInside) {
+            alert("VIDEO FOUND! Trying fullscreen...");
+            videoInside.webkitEnterFullscreen();
+        } else {
+            alert("No video tag found inside iframe.");
+        }
+    } catch (e) {
+        alert("Blocked by cross-origin security. Cannot access video.");
+    }
+});
+
 </script>
 
 </body>
