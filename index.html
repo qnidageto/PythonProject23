@@ -51,35 +51,14 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        #video {
+        iframe {
             width: 100%;
             height: 300px;
-            object-fit: cover;
-            transition: transform 0.3s ease;
+            border: none;
         }
-        #video-container.fullscreen #video {
+        #video-container.fullscreen iframe {
             width: 100%;
             height: 100vh;
-            transform: none;
-        }
-        .qr-container {
-            margin-top: 20px;
-        }
-        .qr-input {
-            display: none;
-        }
-        .qr-label {
-            padding: 10px 20px;
-            background-color: #555;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .qr-label:hover {
-            background-color: #444;
-        }
-        .qr-container input {
-            display: none;
         }
         .expand-button {
             margin-top: 10px;
@@ -108,17 +87,11 @@
     <!-- Go Button -->
     <button id="goButton">Go</button>
 
-    <!-- Video Container -->
+    <!-- Video Container with iframe -->
     <div id="video-container">
-        <video id="video" controls>
-            Your browser does not support the video tag.
-        </video>
-    </div>
-
-    <!-- QR Code Scanning Section -->
-    <div class="qr-container">
-        <label for="qr-upload" class="qr-label">Scan QR Code</label>
-        <input type="file" id="qr-upload" class="qr-input" accept="image/*" onchange="handleFileSelect(event)">
+        <iframe id="video" src="" allow="camera; microphone;" frameborder="0">
+            Your browser does not support iframes.
+        </iframe>
     </div>
 
     <!-- Expand Button -->
@@ -128,9 +101,16 @@
 <script>
     // Handle Go button click
     document.getElementById('goButton').addEventListener('click', function() {
-        const url = document.getElementById('streamURL').value;
-        if (url) {
+        const url = document.getElementById('streamURL').value.trim();
+
+        // Check if the URL is not empty and matches a simple regex for a valid URL format
+        const urlPattern = /^(https?:\/\/)?(www\.)?vdo\.ninja\/\S+$/;
+
+        if (urlPattern.test(url)) {
+            // Set the iframe src to the provided URL
             document.getElementById('video').src = url;
+        } else {
+            alert("Please enter a valid vdo.ninja stream URL.");
         }
     });
 
@@ -143,15 +123,6 @@
             videoContainer.classList.add('fullscreen');
         }
     });
-
-    // QR Code Upload Handling
-    function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (file) {
-            // Use a library to read QR code from the image, like jsQR or others.
-            alert('QR code scanned (functionality not implemented yet)');
-        }
-    }
 </script>
 
 </body>
