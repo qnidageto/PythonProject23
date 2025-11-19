@@ -50,10 +50,10 @@
             background-color: #45a049;
         }
 
-        /* === DESKTOP / DEFAULT SIZE (crop unchanged) === */
+        /* === DESKTOP / DEFAULT SIZE (CROPPED VIEW) === */
         #video-container {
             margin-top: 20px;
-            width: 640px;
+            width: 650px;        /* +10px right */
             height: 1030px;
             border: 1px solid #ccc;
             border-radius: 10px;
@@ -64,7 +64,7 @@
 
         #video {
             position: absolute;
-            top: -320px;
+            top: -310px;         /* +10px top */
             left: -50px;
             width: 739px;
             height: 1600px;
@@ -90,7 +90,6 @@
             background: rgba(0,0,0,0.9);
         }
 
-
         /* === MOBILE VERSION === */
         @media (max-width: 768px) {
 
@@ -110,18 +109,17 @@
                 padding: 8px 16px;
             }
 
-            /* Scale player down on mobile */
             #video-container {
                 margin-top: 10px;
-                width: 320px;        /* 50% of 640 */
-                height: 515px;       /* 50% of 1030 */
+                width: 325px;        /* +5px (half of 10) */
+                height: 515px;
             }
 
             #video {
-                top: -160px;         /* 50% of -320 */
-                left: -25px;         /* 50% of -50 */
-                width: 369.5px;      /* 50% of 739 */
-                height: 800px;       /* 50% of 1600 */
+                top: -155px;        /* +5px (half of 10) */
+                left: -25px;
+                width: 369.5px;
+                height: 800px;
             }
 
             /* Fullscreen button also shrinks slightly */
@@ -132,6 +130,18 @@
                 padding: 8px 10px;
             }
         }
+
+        /* Optional: when container is fullscreen you can later tweak size
+           but cropping stays the same either way, because iframe is still
+           bigger and shifted with overflow:hidden on the container. */
+        #video-container:fullscreen,
+        #video-container:-webkit-full-screen {
+            /* you can keep default size or set to full viewport if you want:
+               width: 100vw;
+               height: 100vh;
+            */
+        }
+
     </style>
 
 </head>
@@ -144,16 +154,16 @@
 <div class="container">
 
     <!-- URL Input -->
-    <input type="text" id="streamURL" value="https://vdo.ninja/?view=0"
+    <input type="text" id="streamURL" value="https://vdo.ninja/?view=Pp3zQwa"
            placeholder="Enter stream URL" />
-
+    test
     <!-- Go button -->
     <button id="goButton">Go</button>
 
     <!-- Video container with crop -->
     <div id="video-container">
 
-        <!-- IMPORTANT: full iOS fullscreen permissions -->
+        <!-- iFrame with VDO.Ninja stream -->
         <iframe id="video"
                 src=""
                 frameborder="0"
@@ -183,9 +193,9 @@
         }
     });
 
-
-       /* =====================================================
-       FULLSCREEN FIX FOR iPHONE / SAFARI
+    /* =====================================================
+       FULLSCREEN: USE THE CROPPING CONTAINER ONLY
+       (so we keep the exact same cropped view in fullscreen)
        ===================================================== */
 
     function openFullscreen(elem) {
@@ -214,35 +224,18 @@
 
     function isFullscreenActive() {
         return document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.msFullscreenElement ||
-            null;
+               document.webkitFullscreenElement ||
+               document.msFullscreenElement ||
+               null;
     }
 
-    const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
-
-    // Button toggles FULLSCREEN (tries iframe first, then container)
+    // We don't care about iframe vs container anymore:
+    // We ALWAYS fullscreen the container to preserve the crop.
     document.getElementById('fullscreen-btn').addEventListener('click', function () {
-        const iframe = document.getElementById('video');
         const container = document.getElementById('video-container');
 
         if (!isFullscreenActive()) {
-            const preferredTarget = isIOS ? container : iframe;
-            const fallbackTarget = isIOS ? null : container;
-
-            try {
-                const request = openFullscreen(preferredTarget);
-
-                if (request && typeof request.then === 'function' && fallbackTarget) {
-                    request.catch(() => openFullscreen(fallbackTarget));
-                } else if (!request && fallbackTarget) {
-                    openFullscreen(fallbackTarget);
-                }
-            } catch (err) {
-                if (fallbackTarget) {
-                    openFullscreen(fallbackTarget);
-                }
-            }
+            openFullscreen(container);
         } else {
             closeFullscreen();
         }
