@@ -3,24 +3,25 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body, html {
+  html, body {
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    height: 100%;
     background: black;
-    font-family: Arial, sans-serif;
     color: white;
+    font-family: Arial, sans-serif;
   }
 
+  /* Top bar with input */
   #controls {
     width: 100%;
     padding: 8px;
-    background: #111;
     box-sizing: border-box;
+    background: #111;
   }
 
   #urlInput {
-    width: 75%;
+    width: 70%;
     padding: 8px;
     font-size: 14px;
     border-radius: 6px;
@@ -34,27 +35,33 @@
     background: #28a745;
     color: white;
     border-radius: 6px;
-    margin-left: 4px;
+    margin-left: 5px;
   }
 
-  /* ==== CROP WINDOW ==== */
-  /* This is the visible “hole”. Everything outside is hidden. *s/
+  /* Full-screen crop window */
   #crop-box {
-    width: 360px;      /* visible width (adjust for more/less plastic) */
-    height: 760px;     /* visible height */
+    position: fixed;
+    top: 44px;               /* height of controls bar */
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 44px);
     overflow: hidden;
-    position: relative;
-    margin: 0 auto;
     background: black;
   }
 
-  /* The full VDO.Ninja video */
-  iframe {
+  /* The VDO.Ninja page inside */
+  #videoFrame {
     position: absolute;
-    top: -210px;       /* move video UP  (more negative = show lower part) */
-    left: -70px;       /* move video LEFT (more negative = show more right side) */
-    width: 720px;      /* “real” video width inside */
-    height: 1440px;    /* “real” video height inside */
+    top: 50%;
+    left: 50%;
+
+    /* ⬇⬇⬇  THESE ARE THE IMPORTANT NUMBERS  ⬇⬇⬇ */
+    /* zoom in so the bezel/title bar go off-screen */
+    transform: translate(-50%, -50%) scale(1.6);
+    transform-origin: center center;
+
+    width: 100vw;
+    height: 100vh;
     border: none;
   }
 </style>
@@ -76,14 +83,5 @@ function loadVideo() {
     let url = document.getElementById("urlInput").value.trim();
     if (!url) return;
 
-    if (!url.startsWith("https://") && !url.startsWith("http://")) {
-        alert("Please paste a valid VDO.Ninja link.");
-        return;
-    }
-
-    document.getElementById("videoFrame").src = url;
-}
-</script>
-
-</body>
-</html>
+    // Add cleanoutput if not present (optional but nice)
+    if (!
