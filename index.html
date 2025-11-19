@@ -71,7 +71,6 @@
             border: none;
         }
 
-        /* Fullscreen button: TOP-LEFT + bigger */
         #fullscreen-btn {
             position: absolute;
             top: 10px;
@@ -130,16 +129,12 @@
             }
         }
 
-        /* Browser native fullscreen (desktop etc.) */
+        /* Browser native fullscreen */
         #video-container:fullscreen,
         #video-container:-webkit-full-screen {
-            /* you CAN set these if you want:
-               width: 100vw;
-               height: 100vh;
-             */
         }
 
-        /* ===== iOS "fake fullscreen" ===== */
+        /* ===== iOS fake fullscreen (fixed) ===== */
         #video-container.fake-fullscreen {
             position: fixed;
             top: 0;
@@ -151,19 +146,11 @@
             z-index: 9998;
         }
 
-        #video-container.fake-fullscreen #fullscreen-btn {
-            z-index: 10000;
-        }
+        /* IMPORTANT:
+           DO NOT OVERRIDE #video IN FULLSCREEN.
+           This preserves the exact same crop.
+        */
 
-        /* Optionally stretch iframe in fake fullscreen.
-           If you want to preserve EXACT cropping, you can remove
-           these and keep your original offsets instead. */
-        #video-container.fake-fullscreen #video {
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
     </style>
 </head>
 <body>
@@ -176,7 +163,7 @@
 
     <input type="text" id="streamURL" value="https://vdo.ninja/?view=Pp3zQwa"
            placeholder="Enter stream URL" />
-    test
+
     <button id="goButton">Go</button>
 
     <div id="video-container">
@@ -198,36 +185,27 @@
     /* ====== LOAD STREAM ====== */
     document.getElementById('goButton').addEventListener('click', function () {
         const url = document.getElementById('streamURL').value.trim();
-        const urlPattern = /^(https?:\/\/)?(www\.)?vdo\.ninja\/\S+$/;
+        const urlPattern = /^https?:\/\/[^ ]+$/;
 
         if (urlPattern.test(url)) {
             document.getElementById('video').src = url;
         } else {
-            alert("Please enter a valid vdo.ninja URL.");
+            alert("Please enter a valid stream URL.");
         }
     });
 
-    /* ====== Fullscreen helpers (desktop / Android) ====== */
+    /* ====== Fullscreen helpers ====== */
     function openFullscreen(elem) {
         if (!elem) return null;
-        if (elem.requestFullscreen) {
-            return elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) {
-            return elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-            return elem.msRequestFullscreen();
-        }
-        return null;
+        if (elem.requestFullscreen) return elem.requestFullscreen();
+        if (elem.webkitRequestFullscreen) return elem.webkitRequestFullscreen();
+        if (elem.msRequestFullscreen) return elem.msRequestFullscreen();
     }
 
     function closeFullscreen() {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
+        if (document.exitFullscreen) return document.exitFullscreen();
+        if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+        if (document.msExitFullscreen) return document.msExitFullscreen();
     }
 
     function isFullscreenActive() {
@@ -238,18 +216,19 @@
     }
 
     /* ====== iOS detection ====== */
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                  (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+    const isIOS =
+        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 
     const fsBtn = document.getElementById('fullscreen-btn');
     const container = document.getElementById('video-container');
 
     fsBtn.addEventListener('click', function () {
         if (isIOS) {
-            // Fake fullscreen on iPhone/iPad
+            /* Fake fullscreen — preserves crop */
             container.classList.toggle('fake-fullscreen');
         } else {
-            // Real fullscreen where supported
+            /* Real fullscreen */
             if (!isFullscreenActive()) {
                 openFullscreen(container);
             } else {
