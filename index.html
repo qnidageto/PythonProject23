@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Stream Viewer</title>
 
     <style>
@@ -129,28 +129,21 @@
             }
         }
 
-        /* Browser native fullscreen */
+        /* Browser native fullscreen (desktop/Android) */
         #video-container:fullscreen,
         #video-container:-webkit-full-screen {
         }
 
-        /* ===== iOS fake fullscreen (fixed) ===== */
+        /* ===== iOS fake fullscreen ===== */
         #video-container.fake-fullscreen {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
             margin: 0;
             border-radius: 0;
             z-index: 9998;
+            transform-origin: top left;
         }
-
-        /* IMPORTANT:
-           DO NOT OVERRIDE #video IN FULLSCREEN.
-           This preserves the exact same crop.
-        */
-
     </style>
 </head>
 <body>
@@ -163,7 +156,6 @@
 
     <input type="text" id="streamURL" value="https://vdo.ninja/?view=Pp3zQwa"
            placeholder="Enter stream URL" />
-    test
 
     <button id="goButton">Go</button>
 
@@ -195,7 +187,7 @@
         }
     });
 
-    /* ====== Fullscreen helpers ====== */
+    /* ====== Fullscreen helpers (non-iOS) ====== */
     function openFullscreen(elem) {
         if (!elem) return null;
         if (elem.requestFullscreen) return elem.requestFullscreen();
@@ -224,17 +216,41 @@
     const fsBtn = document.getElementById('fullscreen-btn');
     const container = document.getElementById('video-container');
 
+    /* Scale function: magnify the existing crop */
+    function applyFullscreenScale() {
+        const rect = container.getBoundingClientRect();
+        const scaleX = window.innerWidth / rect.width;
+        const scaleY = window.innerHeight / rect.height;
+        const scale = Math.min(scaleX, scaleY);
+        container.style.transform = `scale(${scale})`;
+    }
+
     fsBtn.addEventListener('click', function () {
         if (isIOS) {
-            /* Fake fullscreen — preserves crop */
-            container.classList.toggle('fake-fullscreen');
+            // Fake fullscreen: same crop, scaled
+            const goingFullscreen = !container.classList.contains('fake-fullscreen');
+
+            if (goingFullscreen) {
+                container.classList.add('fake-fullscreen');
+                applyFullscreenScale();
+            } else {
+                container.classList.remove('fake-fullscreen');
+                container.style.transform = 'none';
+            }
         } else {
-            /* Real fullscreen */
+            // Real fullscreen
             if (!isFullscreenActive()) {
                 openFullscreen(container);
             } else {
                 closeFullscreen();
             }
+        }
+    });
+
+    // Recalculate scale if orientation/size changes in fake fullscreen
+    window.addEventListener('resize', () => {
+        if (isIOS && container.classList.contains('fake-fullscreen')) {
+            applyFullscreenScale();
         }
     });
 </script>
